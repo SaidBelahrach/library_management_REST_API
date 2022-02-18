@@ -16,7 +16,6 @@ namespace library_management_REST_API.Models
         public string Author  { get; set; }
 
         [DataType(DataType.Currency)]
-        public double prix { get; set; }
-
+        public double prix { get; set; } 
     }
  }
