@@ -92,6 +92,7 @@ public class BooksController : ControllerBase
     private string uploadImg(IFormFile img)
     {
         string UniqueFileName=  Guid.NewGuid().ToString().Substring(0,10)+"_"+img.FileName;  //if (!System.IO.File.Exists(ImgPath)) {   //ImgPath+="2";  }
+        if(!Directory.Exists(_HostingEnv.WebRootPath+ "\\images")) Directory.CreateDirectory(_HostingEnv.WebRootPath+ "\\images");
         var ImgPath = Path.Combine(_HostingEnv.WebRootPath, "images",UniqueFileName);
         var ImgStream = new FileStream(ImgPath, FileMode.Append);
         img.CopyTo(ImgStream);
