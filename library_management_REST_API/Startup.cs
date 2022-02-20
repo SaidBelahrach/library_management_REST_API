@@ -40,6 +40,7 @@ namespace library_management_REST_API
             services.AddDbContext<myDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.EnableSensitiveDataLogging();
             });
             services.AddSwaggerGen(c =>
             {
@@ -76,9 +77,9 @@ namespace library_management_REST_API
             }*/
 
             // global error handler
-            //app.ConfigureExceptionHandler(env);
-            app.UseMiddleware<ErrorHandlerMiddleware>();
-
+            app.ConfigureExceptionHandler(env);
+           // app.UseMiddleware<ErrorHandlerMiddleware>();
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseRouting();

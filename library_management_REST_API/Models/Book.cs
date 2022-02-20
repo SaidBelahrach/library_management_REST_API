@@ -13,9 +13,14 @@ namespace library_management_REST_API.Models
 
         [Required]
         public string Title { get; set; }
+
+        [Required]
         public string Author  { get; set; }
 
         [DataType(DataType.Currency)]
         public double prix { get; set; } 
+
+        [Url]
+        public string imgUrl { get; set; }
     }
  }

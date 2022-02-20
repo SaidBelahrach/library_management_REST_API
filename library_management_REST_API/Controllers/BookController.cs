@@ -1,29 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using library_management_REST_API.DataAccess;
 using library_management_REST_API.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging; 
+
 [ApiController]
 [Route("api/[controller]")]     //check auto ModelState
 public class BooksController : ControllerBase
 {
     private readonly myDbContext _context;
-    private readonly ILogger<BooksController> _logger;
-    public BooksController(myDbContext ctx, ILogger<BooksController> logger)
+    private readonly IWebHostEnvironment _HostingEnv;
+    public BooksController(myDbContext ctx, IWebHostEnvironment HostingEnv)
     {
         _context = ctx;
-        _logger = logger;
+        _HostingEnv = HostingEnv;
     }
 
     [HttpGet]   //api/books
     public async Task<ActionResult<IEnumerable<Book>>> getBooksAsync()
     {
-        throw new UnauthorizedAccessException("errorrr");
         return Ok(await _context.Books.ToListAsync());
     }
 
@@ -39,35 +40,29 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]   //api/books
-    public async Task<ActionResult> PostBookAsync(Book book)
-    {
-        if (!ModelState.IsValid || book == null)
-        {
-            ModelState.AddModelError("invalid", "Model not valid");
-            return BadRequest(ModelState);
-        }
+    public async Task<ActionResult> PostBookAsync([FromForm] Book book, IFormFile image)
+    {  //ApiController check auto ModelState 
+        book.imgUrl = uploadImg(image);
         var result = await _context.Books.AddAsync(book);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(getBookAsync),"Books", new { id = result.Entity.NoOfBooks }, result.Entity);/*returning a 201 Created response, with a Location header pointing to the url for the newly created response, and the object itself in the body. The url should be the url at which a GET request would return the object url. This would be considered the 'Correct' behaviour in a RESTful system.*/
+        return CreatedAtAction(nameof(getBookAsync), "Books", new { id = result.Entity.NoOfBooks }, result.Entity);/*returning a 201 Created response, with a Location header pointing to the url for the newly created response, and the object itself in the body. The url should be the url at which a GET request would return the object url. This would be considered the 'Correct' behaviour in a RESTful system.*/
     }
 
     [HttpPut("{id}")]    //api/books/1
-    public async Task<ActionResult> PutBookAsync(int id, Book book)
-    {        //check auto ModelState
-        var bookToUpdate = await _context.Books.FirstOrDefaultAsync(b => b.NoOfBooks == id);
-        if (bookToUpdate == null)
+    public async Task<ActionResult> PutBookAsync([FromRoute] int id, [FromForm] Book book, [FromForm] IFormFile image)
+    {        //ApiController check auto ModelState 
+        if (!_context.Books.Contains(book))
         {
             return NotFound($"Book with id={id} is not found");
         }
-        if (id == book.NoOfBooks)
+        if (id != book.NoOfBooks)
         {
             return BadRequest("Bad request");
-        }
-        bookToUpdate.prix = book.prix;
-        bookToUpdate.Title = book.Title;
-        bookToUpdate.Author = book.Author;
+        } 
+        book.imgUrl = uploadImg(image);
+        _context.Entry(book).State = EntityState.Modified;
         await _context.SaveChangesAsync();
-        return Ok(bookToUpdate);
+        return Ok(book);
     }
 
     [HttpDelete("{id}")]    //api/books/1
@@ -78,9 +73,10 @@ public class BooksController : ControllerBase
         {
             return NotFound($"Book with id={id} is not found");
         }
+        System.IO.File.Delete(bookToDelete.imgUrl);
         _context.Books.Remove(bookToDelete);
         await _context.SaveChangesAsync();
-        return NoContent();
+        return Ok(bookToDelete);
 
     }
 
@@ -88,8 +84,17 @@ public class BooksController : ControllerBase
     public async Task<ActionResult> SearchBookByTitleAsync(string title)
     {
         var searchResult = await _context.Books.Where(b => b.Title.Contains(title)).ToListAsync();
-        if(searchResult.Any())
+        if (searchResult.Any())
             return Ok(searchResult);
         return NotFound();
+    }
+
+    private string uploadImg(IFormFile img)
+    {
+        string UniqueFileName=  Guid.NewGuid().ToString().Substring(0,10)+"_"+img.FileName;  //if (!System.IO.File.Exists(ImgPath)) {   //ImgPath+="2";  }
+        var ImgPath = Path.Combine(_HostingEnv.WebRootPath, "images",UniqueFileName);
+        var ImgStream = new FileStream(ImgPath, FileMode.Append);
+        img.CopyTo(ImgStream);
+        return ImgPath;
     }
 }
