@@ -1,4 +1,4 @@
-using library_management_REST_API.DataAccess;
+using library_management_REST_API.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -42,6 +42,7 @@ namespace library_management_REST_API
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
                 options.EnableSensitiveDataLogging();
             });
+            services.AddScoped<BookRepository,BookRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "library_management_REST_API", Version = "v1" });
@@ -77,8 +78,8 @@ namespace library_management_REST_API
             }*/
 
             // global error handler
-            app.ConfigureExceptionHandler(env);
-           // app.UseMiddleware<ErrorHandlerMiddleware>();
+           // app.ConfigureExceptionHandler(env);
+            app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();
             app.UseHttpsRedirection();
 

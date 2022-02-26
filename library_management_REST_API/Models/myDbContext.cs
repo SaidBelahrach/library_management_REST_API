@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace library_management_REST_API.DataAccess
+namespace library_management_REST_API.Models
 {
     public class myDbContext:DbContext
     { 

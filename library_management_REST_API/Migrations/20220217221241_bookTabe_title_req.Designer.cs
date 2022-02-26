@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using library_management_REST_API.DataAccess;
+using library_management_REST_API.Models;
 
 namespace library_management_REST_API.Migrations
 {
