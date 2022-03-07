@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
-
 public class ErrorModel
 {
     public int Status { get; set; }
@@ -9,21 +7,21 @@ public class ErrorModel
 
     public ErrorModel()
     {
-        Status=500;
-        Message="Error";
-        Source="";
-        Stack="";
+        Status = 500;
+        Message = "Error";
+        Source = "";
+        Stack = "";
     }
-     public ErrorModel(int Stts,string msg)
-     {
-        Status=Stts;
-        Message=msg;
-     }
-    public ErrorModel(int Stts,string msg, string src,string stack)
+    public ErrorModel(int Stts, string msg)
     {
-        Status=Stts;
-        Message=msg;
-        Source=src;
-        Stack=stack;
+        Status = Stts;
+        Message = msg;
+    }
+    public ErrorModel(int Stts, string msg, string src, string stack)
+    {
+        Status = Stts;
+        Message = msg;
+        Source = src;
+        Stack = stack;
     }
 }

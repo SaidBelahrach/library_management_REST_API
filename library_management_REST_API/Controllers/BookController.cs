@@ -1,22 +1,29 @@
+using library_management_REST_API.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using library_management_REST_API.Models;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]     //check auto ModelState
+
 public class BooksController : ControllerBase
 {
     private readonly IWebHostEnvironment _HostingEnv;
+    private readonly UserManager<IdentityUser> _userManager;
     private readonly BookRepository _bookRepo;
-    public BooksController(BookRepository bookRepo, IWebHostEnvironment HostingEnv)
+    public BooksController(BookRepository bookRepo, 
+                           IWebHostEnvironment HostingEnv,
+                           UserManager<IdentityUser> userManager)
     {
+        _userManager = userManager;
         _bookRepo = bookRepo;
         _HostingEnv = HostingEnv;
     }
@@ -27,9 +34,12 @@ public class BooksController : ControllerBase
         return Ok(await _bookRepo.GetAllBooksAsync());
     }
 
+    [Authorize]
     [HttpGet("{id:int}")]    //api/books/1
     public async Task<ActionResult> getBookAsync(int id)
     {
+        var userId = HttpContext.User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier) ?.Value; 
+        var user = await _userManager.GetUserAsync(HttpContext.User); 
         var book = await _bookRepo.FindBookByIdAsync(id);
         if (book == null)
         {

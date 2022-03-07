@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 public class BookRepository
 {
     private readonly myDbContext _context;
@@ -26,6 +27,7 @@ public class BookRepository
     {
         return await _context.Books.FirstOrDefaultAsync(b => b.NoOfBooks == bookId);
     }
+
     public async Task<List<Book>> Get(Expression<Func<Book, bool>> exp)
     {
         return await _context.Books.Where(exp).ToListAsync();
@@ -44,6 +46,7 @@ public class BookRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
     public async Task<bool> DeleteBookAsync(Book book)
     {
         _context.Books.Remove(book);

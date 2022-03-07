@@ -1,8 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text.Json;
-using Microsoft.AspNetCore.Http;
 
 public class ErrorHandlerMiddleware
 {
