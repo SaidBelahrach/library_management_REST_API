@@ -27,15 +27,15 @@ namespace library_management_REST_API
 
             services.AddControllers(options =>
             {
-                options.SuppressAsyncSuffixInActionNames = false;
+                options.SuppressAsyncSuffixInActionNames = false; //why? https://stackoverflow.com/questions/37839278/asp-net-core-rc2-web-api-post-when-to-use-create-createdataction-vs-created
             });
-            // services.AddMvc(options =>{   options.SuppressAsyncSuffixInActionNames = false;  }); //why? https://stackoverflow.com/questions/37839278/asp-net-core-rc2-web-api-post-when-to-use-create-createdataction-vs-created
 
             services.AddDbContext<myDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
                 options.EnableSensitiveDataLogging();
             });
+
             services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -43,6 +43,7 @@ namespace library_management_REST_API
                 options.Password.RequiredLength = 5;
             }).AddEntityFrameworkStores<myDbContext>()
               .AddDefaultTokenProviders();  // generate opaque tokens for account operations (like password reset or email change) and two-factor authentication.
+     
             services.AddAuthentication(auth =>
             {
                 auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -52,17 +53,27 @@ namespace library_management_REST_API
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                {//Issuer and Audience claims are optional.They are being used here to identify the application (issuer) and the client (audience).
+                    // Validate the JWT Audience (aud) claim (optional)
+                    ValidateAudience = true,    
                     ValidAudience = Configuration["JWT:ValidAudience"],
-                    ValidIssuer = Configuration["JWT:ValidIssuer"],
+
+                    // Validate the JWT Issuer (iss) claim  (optional)
+                    ValidateIssuer = true, //The Issuer (iss) claim matches “ExampleIssuer”
+                    ValidIssuer = Configuration["JWT:ValidIssuer"], //like login.microsoft.com/...
+
+                    // Validate the token expiry
                     RequireExpirationTime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"])),
-                    ValidateIssuerSigningKey = true
+
+                    // The signing key must match!
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                 };
             });
+
             services.AddScoped<BookRepository, BookRepository>();
+            services.AddScoped(typeof(GenericRepository<>), typeof(GenericRepository<>));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "library_management_REST_API", Version = "v1" });
@@ -71,38 +82,12 @@ namespace library_management_REST_API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            /*    if (env.IsDevelopment())
-                {
-                    app.UseDeveloperExceptionPage();
-                    app.UseSwagger();
-                    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "library_management_REST_API v1"));
-                }
-                else
-                {
-                    app.UseExceptionHandler(options =>
-                    {
-                        options.Run(
-                            async context =>
-                            {
-                                context.Response.StatusCode=(int) StatusCodes.Status500InternalServerError;
-                                var ex = context.Features.Get<IExceptionHandlerPathFeature>();
-                                if (ex != null)
-                                {
-                                    ErrorModel error = new ErrorModel((int)StatusCodes.Status500InternalServerError, ex.Error.Message, "", ex.Error.StackTrace);
-                                    await context.Response.WriteAsJsonAsync(error);
-                                }
-                            }
-                        );
-                    });
-                }*/
-
+        { 
             // global error handler
             // app.ConfigureExceptionHandler(env);
             app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseStaticFiles();
             app.UseHttpsRedirection();
-
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Linq; 
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace library_management_REST_API.Services
@@ -27,6 +28,6 @@ namespace library_management_REST_API.Services
         {
             // var userId = HttpContext.User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier)?.Value;
             return await _userManager.GetUserAsync(ctx.User);
-        }
+        } 
     }
 }

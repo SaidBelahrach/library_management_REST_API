@@ -17,29 +17,28 @@ using System.Threading.Tasks;
 public class BooksController : ControllerBase
 {
     private readonly IWebHostEnvironment _HostingEnv;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly GenericRepository<Book> _repo;
     private readonly BookRepository _bookRepo;
     public BooksController(BookRepository bookRepo, 
                            IWebHostEnvironment HostingEnv,
-                           UserManager<IdentityUser> userManager)
+                           GenericRepository<Book> repo)
     {
-        _userManager = userManager;
         _bookRepo = bookRepo;
         _HostingEnv = HostingEnv;
+        _repo = repo;
     }
 
     [HttpGet]   //api/books
     public async Task<ActionResult<IEnumerable<Book>>> getBooksAsync()
     {
-        return Ok(await _bookRepo.GetAllBooksAsync());
+       // return Ok(await _bookRepo.GetAllBooksAsync());
+        return Ok(await _repo.Get());
     }
 
     [Authorize]
     [HttpGet("{id:int}")]    //api/books/1
     public async Task<ActionResult> getBookAsync(int id)
-    {
-        var userId = HttpContext.User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier) ?.Value; 
-        var user = await _userManager.GetUserAsync(HttpContext.User); 
+    { 
         var book = await _bookRepo.FindBookByIdAsync(id);
         if (book == null)
         {

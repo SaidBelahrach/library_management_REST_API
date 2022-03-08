@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace library_management_REST_API.Controllers
 {
+    //https://www.c-sharpcorner.com/article/jwt-authentication-and-authorization-in-net-6-0-with-identity-framework/
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -43,8 +44,8 @@ namespace library_management_REST_API.Controllers
                 var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Role, UserRoles.User),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    //new Claim(ClaimTypes.Role, UserRoles.User),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),  //JWT ID for this token
                 };
 
                 foreach (var userRole in userRoles)
@@ -129,6 +130,5 @@ namespace library_management_REST_API.Controllers
                 );
             return token;
         }
-
     }
 }
